@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<script src="http://d3js.org/d3.hexbin.v0.min.js?5c6e4f0"></script>
+		<script src="venn.js"></script>
+		
+	</head>
+	<body>
+		<svg class="diag" x=0 y=0 height=700 width=1200></svg>
+	</body>
+		<script type="text/javascript">
+		
+			// MODEL PARAMETERS
+			var prodAwareSpaceSize = 231542; //from topic size
+			var brands = ['Rackspace', 'Joyent', 'AWS']; //company + competitiors
+			var brandAwareSpaceSize = [27557, 1418, 40190]; //number of articles with company mentions
+			var brandOverlaps = [[[1,2], 382], [[1, 3], 2695], [[2, 3], 402], [[1, 2, 3], 191]]; // number of articles with mentions of each pair (overlaps of 3 or more circles make visual better but not strictly necessary
+			
+			//
+			
+			
+			//prodAwareSpaceSize = # of articles in topic
+			//brands = list of brand names
+			//brandAwareSpaceSize = list of # of articles mentioning each brand
+			//brandOverlaps = list of overlap sizes each with the format [[list of brands overlapping], size of overlap]
+													//ex: if the size of the 1st and 3rd brand overlap is 100, [[1, 3], 100] 
+			var drawVenn = function(prodAwareSpaceSize, brands, brandAwareSpaceSize, brandOverlaps)
+			{
+	
+				circs = getVennObj(prodAwareSpaceSize, brands, brandAwareSpaceSize, brandOverlaps);
+				venn.drawD3Diagram(d3.select(".diag"), circs, 600, 600, props);
+			}
+			
+			
+			
+			var indexOfLst = function(lst, el)
+			{
+				for (k = 0; k < lst.length; k++)
+				{
+					if (lst[k][0][0] == el[0] && lst[k][0][1] == el[1])
+					{
+						return k;
+					};
+				};
+				return -1;
+				
+			}
+
+			
+			var getVennObj = function(prodAwareSpaceSize, brands, brandAwareSpaceSize, brandOverlaps)
+			{
+				var set = [];
+				var overlaps = [];
+				for (i = 0; i < brands.length; i++)
+				{
+					set[set.length] = {label:brands[i], size:brandAwareSpaceSize[i]};
+					overlaps[overlaps.length] = {sets:[0, i + 1], size:brandAwareSpaceSize[i]};
+				};
+				for (i = 0; i < brandOverlaps.length; i++)
+				{
+					overlaps[overlaps.length] = {sets: brandOverlaps[i][0], size: brandOverlaps[i][1]};
+				};
+				set.unshift({label: "Product Aware", size: prodAwareSpaceSize});
+				return venn.venn(set, overlaps);
+			}			
+			
+			func = d3.scale.category10(); 
+			var props = {circleFillColours: function(i){ if (i > 0) {return func(i);} else {return "white";}},
+						textFillColours: function(i){ if (i > 0) {return func(i);} else {return "black";}},
+						circleStrokeColours: function(i){ if (i > 0) {return func(i);} else {return "black";}},
+						circleStrokeWidth: function(i) { if (i > 0) {return 0; } else {return 1;};}};
+						
+
+			///Cloud Computing Prod Space
+			drawVenn(231542, ['Rackspace', 'Joyent', 'AWS'], [27557, 1418, 40190], [[[1,2], 382], [[1, 3], 2695], [[2, 3], 402], [[1, 2, 3], 191]]);
+
+		</script>
+</html>
